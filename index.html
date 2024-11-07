@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RedditFeed - A Minimalist Reddit Experience</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<div class="header">
+    <nav class="tabs" role="tablist">
+        <button class="tab active" role="tab" aria-selected="true">Popular</button>
+        <button class="tab" role="tab" aria-selected="false">Technology</button>
+        <button class="tab" role="tab" aria-selected="false">Science</button>
+        <button class="tab" role="tab" aria-selected="false">News</button>
+        <button class="tab" role="tab" aria-selected="false">Entertainment</button>
+    </nav>
+</div>
+<main class="content">
+    <div id="posts"></div>
+    <div class="loading" id="loading">Loading posts...</div>
+</main>
+<script>
+// Your JavaScript code here
+const postsContainer = document.getElementById('posts');
+const loadingElement = document.getElementById('loading');
+const tabs = document.querySelectorAll('.tab');
+
+// Simulate post data (in real implementation, this would come from Reddit's API)
+const generatePosts = (count = 10) => {
+    const posts = [];
+    for (let i = 0; i < count; i++) {
+        posts.push({
+            id: i,
+            author: `user${Math.floor(Math.random() * 1000)}`,
+            title: `Sample Post ${i + 1}`,
+            content: `This is a sample post content for post number ${i + 1}. In a real implementation, this would be actual content from Reddit.`,
+            upvotes: Math.floor(Math.random() * 1000),
+            comments: Math.floor(Math.random() * 100)
+        });
+    }
+    return posts;
+};
+
+const renderPost = (post) => {
+    const postElement = document.createElement('article');
+    postElement.className = 'post-card';
+    postElement.innerHTML = `
+        <div class="post-header">
+            <span class="author">Posted by u/${post.author}</span>
+        </div>
+        <h2 class="post-title">${post.title}</h2>
+        <p class="post-content">${post.content}</p>
+        <div class="post-actions">
+            <button class="action-btn" aria-label="Upvote">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 4L4 12h4v8h8v-8h4L12 4z"/>
+                </svg>
+                ${post.upvotes}
+            </button>
+            <button class="action-btn" aria-label="Comment">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                ${post.comments}
+            </button>
+        </div>
+    `;
+    return postElement;
+};
+
+const loadPosts = (tabName) => {
+    postsContainer.innerHTML = '';
+    loadingElement.style.display = 'block';
+
+    // Simulate API call delay
+    setTimeout(() => {
+        const posts = generatePosts();
+        loadingElement.style.display = 'none';
+
+        posts.forEach(post => {
+            postsContainer.appendChild(renderPost(post));
+        });
+    }, 1000);
+};
+
+// Tab switching logic
+tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+        tabs.forEach(t => {
+            t.classList.remove('active');
+            t.setAttribute('aria-selected', 'false');
+        });
+        tab.classList.add('active');
+        tab.setAttribute('aria-selected', 'true');
+        loadPosts(tab.textContent.toLowerCase());
+    });
+});
+
+// Initial load
+loadPosts('popular');
+
+// Infinite scroll implementation
+let isLoading = false;
+window.addEventListener('scroll', () => {
+    if (isLoading) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+    if (scrollTop + clientHeight >= scrollHeight - 100) {
+        isLoading = true;
+        setTimeout(() => {
+            const newPosts = generatePosts(5);
+            newPosts.forEach(post => {
+                postsContainer.appendChild(renderPost(post));
+            });
+            isLoading = false;
+        }, 500);
+    }
+});
+</script>
+</body>
+</html>
+
